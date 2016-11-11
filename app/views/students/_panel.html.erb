@@ -1,0 +1,162 @@
+<%
+@student = Student.find_by(id: session[:user_id])
+@progr=Progre.find_by(student_id: session[:user_id])
+
+    gr= Student.find(session[:user_id])
+    progresy=Progre.order(points: :desc)
+    i=1
+    k=0
+    progresy.each do |pr|
+       k=k+1
+        if pr.student_id==session[:user_id]
+            @ran=i
+            @j=k
+        end
+        gru=Student.find(pr.student_id)
+        if gru.group_id==gr.group_id
+            i=i+1
+        end
+    end
+verification
+%>
+
+
+<div class="student_header">
+        <div class="student_avatar">
+            <%= link_to student_studentprofile_path(session[:user_id], :results => "1"), :class => "tooltip" do %>
+                <div class="student_name">
+                    <h2><%= @student.name %></h2>
+                </div>
+                <div class="student_lastname">
+                    <h2><%= @student.lastname %></h2>
+                </div>
+                <span>Kliknij, aby przejść do profilu gracza i uzyskać szczegółowe informacje o koncie.</span>
+            <% end %>
+        </div>
+    <div class="student_statistic">
+        <div>
+            <div class="student_hp">
+                <h4>hp: <%=@progr.hp %>/100</h4>
+            </div>
+            <div class="student_pustak"></div>
+            <div class="student_hp_potion">
+                <%= link_to student_hppotion_path(session[:user_id]), :class =>"tooltip" do %>
+                    <h4>+20 hp</h4>  
+                    <img src="/assets/student/hp_potion.png" alt="">
+                    <span>Kup miksturę, aby się uleczyć:<br>
+                        + 20 hp,<br>
+                        - 20 pkt rankingowych,
+                        <br>aby użyc musisz mieć mniej niż 90 hp.
+                    </span>
+                <% end %>
+            </div>
+        </div>
+        <script>
+            $(document).ready(function() {
+                var hp = <%= @progr.hp%>;
+                var exp = <%= @progr.gained_points %>*100/<%=@progr.total%>
+                $('#progress_hp_bar').css("width",hp + "%");
+                $('#progress_exp_bar').css("width",exp + "%");
+            });
+        </script>
+        <div class="progress_hp">
+            <div id="progress_hp_bar" class="progress_hp_bar"></div>
+        </div>
+        <div>
+            <div class="student_exp">
+                <h4>exp: <%=@progr.gained_points%>/<%=@progr.total%></h4>
+            </div>
+        </div>
+        <div class="progress_exp">
+            <div id="progress_exp_bar" class="progress_exp_bar"></div>
+        </div>
+        <div>
+            <div class="student_lvl tooltip">
+                <h4>Poziom: <%=@progr.lvl %></h4>
+                <span>Poziom odpawiada numerze lekcji, która się odbywa.</span>
+            </div>
+            <div class="student_pustak"></div>
+            <div class="student_pkt_rank tooltip">
+                <h4>pkt rankingowe: <%=@progr.points%></h4>
+                <span>Punkty rankingowe zdobywasz za wykonywanie zadań.
+                Zbierz jak najwięcej, aby uzyskać lepsze miejsce w rankingu.
+                Możesz je wydać na zakup mikstury leczniczej</span>
+            </div>
+        </div>
+        <div class="student_rank">
+            <div class="student_rank_world">
+                <div class="student_bg_rank_world">
+                    <h1><%= @j %></h1>
+                </div>
+                <span>ranking<br>światowy</span>
+            </div>
+            <div class="student_pustak"></div>
+            <div class="student_rank_group">
+                <div class="student_bg_rank_group">
+                    <h1><%= @ran %></h1>
+                </div>
+                <span>ranking<br>grupowy</span>
+            </div>
+        </div>
+    </div>
+    <div class="student_other">
+        <div class="student_log_out">
+            <%= link_to logout_path, method: "delete" do %>
+                <div class="log_out tooltip">
+                    <img src="/assets/student/student_logout.png" alt="">
+                    <span>Wyloguj</span>
+                </div>
+            <% end %>
+        </div>
+        <div class="student_settings">
+            <%= link_to settings_path do %>
+                <div class="settings tooltip">
+                    <%= image_tag("/assets/student/settings.png")%>
+                    <span>Ustawienia</span>
+                </div>
+            <% end %>
+        </div>
+        <div class="student_message">
+            <%= link_to messages_path(session[:user_id]) do %>
+                <% if Message.where(student_id: session[:user_id], direction: "0", read: false).count > 0 %>
+                    <div class="new_message tooltip">
+                        <%=image_tag("/assets/student/new_message.png")%>
+                        <span>Masz <%=Message.where(student_id: session[:user_id], direction: "0", read: false).count%> nieprzeczytanych wiadomości </span>
+                    </div>
+                <%else%>
+                    <div class="message tooltip">
+                        <%=image_tag("/assets/student/message.png")%>
+                        
+                        <span>Nie masz nowych wiadomości</span>
+                    </div>
+                <% end %>
+            <% end %>
+        </div>
+        <div class="student_challenge">
+            <%= link_to sidequests_path do%>
+            <%gr=Group.find_by(id: @student.group_id)%>
+                <%if Sidequest.where(level: @progr.lvl, teacher_id: gr.teacher_id).count == Sqanswer.where(student_id: session[:user_id]).count%>
+                    <div class="challenge tooltip">
+                        <%= image_tag("/assets/student/challenge.png") %>
+                        <span>Nie masz nowych wyzwań</span>
+                    </div>
+                <%else%>
+                    <div class="new_challange tooltip">
+                        <%= image_tag("/assets/student/new_challenge.png") %>
+                        <span>Masz <%=Sidequest.where(level: @progr.lvl, teacher_id: gr.teacher_id).count - Sqanswer.where(student_id: session[:user_id]).count%> nowych wyzwań</span>
+                    </div>
+                <%end%>
+            <% end %>
+        </div>
+    </div>
+</div>
+
+<!--<div>-->
+<!--    <br>---------------------------------------------------------------------------------------------------------------</br>-->
+<!--    <br>| <%= link_to "Mapa świata", student_path(session[:user_id]) %> | -->
+
+<!--    <%= link_to "Edytuj profil", edit_student_path(session[:user_id]) %> | -->
+<!--    <%= link_to "FAQ", faq_path() %> |<br><br>-->
+<!--    <%= link_to "Edytuj profil", edit_student_path(session[:user_id]) %> | <br><br>-->
+
+<!--</div>                       -->

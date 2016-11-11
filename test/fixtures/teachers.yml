@@ -1,0 +1,8 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+wykladowca:
+  login: wy
+  password_diggest: <%= Teacher.digest('wy') %>
+  name: WyIM
+  lastname: WyNAz
+  email: wy@example.com

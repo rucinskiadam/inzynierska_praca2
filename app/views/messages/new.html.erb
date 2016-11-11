@@ -1,0 +1,12 @@
+<% if logged_as_student? %>
+    <%= render 'form' %>
+<%end %>
+<% if logged_as_teacher? %>
+    <% if params[:iid]!=nil %>
+        <%= render 'form1' %>
+    <% end %>
+    <% if params[:idg]!=nil %>
+        <%= render 'form2' %>
+    <% end %>
+<%end %>
+
